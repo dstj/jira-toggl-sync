@@ -22,10 +22,10 @@ public class ConsoleHelper
 	}
 	public static bool ConfirmUpdate(ICollection<WorkLogEntry> workLogs)
 	{
-		return Confirm("CHANGED", workLogs, "nUPDATE", AnsiColor.Foreground(Terminal256ColorCodes.DarkOrange3C166));
+		return Confirm("CHANGED", workLogs, "UPDATE", AnsiColor.Foreground(Terminal256ColorCodes.DarkOrange3C166));
 	}
 
-	public static bool Confirm(
+	private static bool Confirm(
 		string kind,
 		ICollection<WorkLogEntry> workLogs,
 		string action,

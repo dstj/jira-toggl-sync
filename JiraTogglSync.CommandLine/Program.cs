@@ -37,6 +37,8 @@ public class Program
 			.Configure(o => o.DescriptionTemplate = jiraWorkItemDescriptionTemplate)
 			.ValidateDataAnnotations();
 
+		services.AddHttpClient();
+
 		services.AddSingleton<WorksheetSyncService>();
 		services.AddOptions<WorksheetSyncService.Options>()
 			.Configure(o =>
@@ -51,7 +53,7 @@ public class Program
 		await using var sp = services.BuildServiceProvider();
 
 		Console.WriteLine("Toggl: Connected as {0}", await sp.GetRequiredService<IExternalWorksheetRepository>().GetUserInformationAsync());
-		Console.WriteLine("JIRA: Connected as {0}", (await sp.GetRequiredService<IJiraRepository>().GetUserInformation()).Email);
+		Console.WriteLine("JIRA: Connected as {0}", (await sp.GetRequiredService<IJiraRepository>().GetUserInformation()).EmailAddress);
 
 		var syncDays = int.Parse(ConfigurationHelper.GetValueFromConfig("syncDays", () => AskFor("Sync how many days")));
 		var roundingToMinutes = int.Parse(ConfigurationHelper.GetValueFromConfig("roundingToMinutes", () => AskFor("Round duration to X minutes")));

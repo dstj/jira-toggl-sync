@@ -110,12 +110,13 @@ public class TogglRepository : IExternalWorksheetRepository
 
 	private static string CreateDescription(TimeEntry timeEntry, string descriptionTemplate)
 	{
-		var result = descriptionTemplate.Replace("{{toggl:id}}", $"[toggl-id:{timeEntry.Id}]")
-			.Replace("{{toggl:description}}", timeEntry.Description)
-			.Replace("{{toggl:isBillable}}", timeEntry.Billable.ToString())
-			.Replace("{{toggl:projectId}}", timeEntry.ProjectId == null ? "" : timeEntry.ProjectId.ToString())
-			.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.Tags ?? Enumerable.Empty<string>()))
-			.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString());
+		var result = descriptionTemplate
+					.Replace("{{toggl:id}}", $"[toggl-id:{timeEntry.Id}]")
+					.Replace("{{toggl:description}}", timeEntry.Description)
+					.Replace("{{toggl:isBillable}}", timeEntry.Billable.ToString())
+					.Replace("{{toggl:projectId}}", timeEntry.ProjectId == null ? "" : timeEntry.ProjectId.ToString())
+					.Replace("{{toggl:tagNames}}", string.Join(",", timeEntry.Tags ?? Enumerable.Empty<string>()))
+					.Replace("{{toggl:taskId}}", timeEntry.TaskId == null ? "" : timeEntry.TaskId.ToString());
 
 		return result;
 	}

@@ -34,7 +34,7 @@ public class WorksheetSyncService
 	public async Task<SyncReport> SynchronizeAsync(DateTimeOffset fromDate, DateTimeOffset toDate, ICollection<string> jiraProjectKeys, bool doPurge, int roundMinutes)
 	{
 		var sourceEntries = await _source.GetEntriesAsync(fromDate, toDate, jiraProjectKeys, roundMinutes);
-		var existingWorkLogs = doPurge ? await _target.GetWorkLogOfIssuesAsync(fromDate, toDate, sourceEntries.Select(x => x.IssueKey).ToList()) : Array.Empty<WorkLogEntry>();
+		var existingWorkLogs = doPurge ? await _target.GetWorkLogOfIssuesAsync(fromDate, toDate, sourceEntries.Select(x => x.IssueKey).Distinct().ToList()) : Array.Empty<WorkLogEntry>();
 
 		var syncPlan = CreateSyncPlan(sourceEntries, existingWorkLogs, doPurge);
 		var syncReport = await ApplyAsync(syncPlan);

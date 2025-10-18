@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using Atlassian.Jira;
 
 namespace JiraTogglSync.Services;
 
 public class WorkLogEntry
 {
 	public string IssueKey { get; set; }
-	public Worklog JiraWorkLog { get; }
-
+	public string? JiraWorklogId { get; set; }
 	public string SourceId { get; set; }
+	public DateTimeOffset Started { get; set; }
+	public int TimeSpentSeconds { get; set; }
+	public string? Comment { get; set; }
 
-	public TimeSpan TimeSpent => JiraWorkLog.TimeSpentInSeconds > 0 ? TimeSpan.FromSeconds(JiraWorkLog.TimeSpentInSeconds) : TimeSpan.FromMinutes(int.Parse(JiraWorkLog.TimeSpent.Split("m")[0]));
+	public TimeSpan TimeSpent => TimeSpan.FromSeconds(TimeSpentSeconds);
 
 	public static string? GetSourceId(string? description)
 	{
@@ -24,36 +25,41 @@ public class WorkLogEntry
 	{
 		IssueKey = issueKey;
 		SourceId = sourceId;
-		JiraWorkLog = new Worklog(timeSpentInMinutes + "m", startDate.UtcDateTime, description);
+		Started = startDate.UtcDateTime;
+		TimeSpentSeconds = timeSpentInMinutes * 60;
+		Comment = description;
 	}
 
-	public WorkLogEntry(string issueKey, string sourceId, Worklog jiraWorkLog)
+	public WorkLogEntry(string issueKey, string sourceId, JiraWorklog jiraWorkLog)
 	{
 		IssueKey = issueKey;
 		SourceId = sourceId;
-		JiraWorkLog = jiraWorkLog;
+		JiraWorklogId = jiraWorkLog.Id;
+		Started = jiraWorkLog.Started;
+		TimeSpentSeconds = jiraWorkLog.TimeSpentSeconds;
+		Comment = jiraWorkLog.Comment?.ToPlainText();
 	}
 
 	public override string ToString()
 	{
-		return $"[{IssueKey}] - {JiraWorkLog.StartDate:d} ({Math.Ceiling((DateTime.UtcNow - JiraWorkLog.StartDate!.Value).TotalDays)}d ago) - {TimeSpent} - {JiraWorkLog.Comment}";
+		return $"[{IssueKey}] - {Started:d} ({Math.Ceiling((DateTime.UtcNow - Started).TotalDays)}d ago) - {TimeSpent} - {Comment}";
 	}
 
 	public bool DifferentFrom(WorkLogEntry other)
 	{
 		if (other.TimeSpent != TimeSpent)
 			return true;
-		if (other.JiraWorkLog.StartDate?.ToUniversalTime() != JiraWorkLog.StartDate?.ToUniversalTime())
+		if (other.Started.ToUniversalTime() != Started.ToUniversalTime())
 			return true;
-		if (other.JiraWorkLog.Comment != JiraWorkLog.Comment)
+		if (other.Comment != Comment)
 			return true;
 		return false;
 	}
 
 	public void Synchronize(WorkLogEntry other)
 	{
-		JiraWorkLog.StartDate = other.JiraWorkLog.StartDate;
-		JiraWorkLog.TimeSpent = other.JiraWorkLog.TimeSpent;
-		JiraWorkLog.Comment = other.JiraWorkLog.Comment;
+		Started = other.Started;
+		TimeSpentSeconds = other.TimeSpentSeconds;
+		Comment = other.Comment;
 	}
 }
