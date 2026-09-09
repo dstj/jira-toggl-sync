@@ -79,7 +79,10 @@ public class JiraRestService : IJiraRepository
 	)
 	{
 		var response = await _httpClient.GetAsync($"rest/api/3/issue/{issueKey}/worklog", cancellationToken);
-		response.EnsureSuccessStatusCode();
+		if (!response.IsSuccessStatusCode) {
+			var body = await response.Content.ReadAsStringAsync(cancellationToken);
+			throw new JiraRestException(issueKey, response.StatusCode, body);
+		}
 
 		var worklogResponse = await response.Content.ReadFromJsonAsync<JiraWorklogResponse>(cancellationToken);
 		if (worklogResponse == null)
